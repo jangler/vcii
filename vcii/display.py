@@ -8,6 +8,7 @@ SHORTCUTS_NORMAL = (
     ('^T', 'Tab over'),
     ('^O', 'Open'),
     ('^S', 'Save'),
+    ('^R', 'Resize'),
 )
 SHORTCUTS_INPUT = (
     ('^C', 'Cancel'),

@@ -35,6 +35,8 @@ class TestApp(unittest.TestCase):
         app.key_command(None, '^Q')
         self.assertEqual(app.mode, MODE_QUIT)
         app.mode = MODE_NORMAL
+        app.key_command(None, '^R')
+        self.assertEqual(app.sheet.column_width(0), 2)
         app.key_command(None, '^S')
         self.assertEqual(app.mode, MODE_SAVE)
         app.mode = MODE_NORMAL

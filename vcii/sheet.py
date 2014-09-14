@@ -109,3 +109,7 @@ class Sheet:
         if index < self.num_columns:
             return self.column_widths[index]
         return DEFAULT_COLUMN_WIDTH
+
+    def resize_column(self, column, row):
+        self.expand(column, row)
+        self.column_widths[column] = len(self.cells[column][row].content) + 2

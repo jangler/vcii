@@ -52,6 +52,8 @@ class App:
                     self.close_tab()
                 if len(self.sheets) == 0:
                     self.mode = MODE_EXIT
+            elif keyname == '^R':
+                self.sheet.resize_column(*self.sheet.cursor)
             elif keyname == '^S':
                 self.mode = MODE_SAVE
                 if self.sheet.title:

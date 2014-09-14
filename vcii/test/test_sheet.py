@@ -81,3 +81,9 @@ class TestSheet(unittest.TestCase):
         sheet.column_widths[1] = 5
         self.assertEqual(sheet.column_width(0), DEFAULT_COLUMN_WIDTH)
         self.assertEqual(sheet.column_width(1), 5)
+
+    def test_resize_column(self):
+        sheet = Sheet()
+        sheet.resize_column(0, 0)
+        self.assertEqual(sheet.size, (1, 1))
+        self.assertEqual(sheet.column_widths, [2])

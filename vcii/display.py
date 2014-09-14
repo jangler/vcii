@@ -6,12 +6,31 @@ SHORTCUTS = {
 }
 
 
+def cursor_bounds(window, sheet):
+    maxyx = window.getmaxyx()
+    margin = len(str(sheet.scroll[1] + window.getmaxyx()[0] - 5)) + 1
+    return (margin, 2), (maxyx[1] - 1, maxyx[0] - 4)
+
+
+def cursor_coordinates(window, sheet):
+    margin = cursor_bounds(window, sheet)[0][0]
+    cursor_y = sheet.cursor[1] + 2 - sheet.scroll[1]
+    if sheet.cursor[0] >= sheet.scroll[0]:
+        cursor_x = (sheet.text_cursor + margin +
+                    sum(sheet.column_width(i)
+                        for i in range(sheet.scroll[0], sheet.cursor[0])))
+    else:
+        cursor_x = -1
+    return cursor_x, cursor_y
+
+
 def draw(window, sheets, current_sheet):
     window.erase()
     draw_tab_line(window, sheets, current_sheet)
+    scroll_sheet(window, current_sheet)
     draw_row_and_column_labels(window, current_sheet)
     draw_cells(window, current_sheet)
-    draw_status_line(window)
+    draw_status_line(window, current_sheet)
     draw_shortcut_lines(window)
     window.refresh()
     set_cursor(window, current_sheet)
@@ -33,38 +52,38 @@ def draw_tab_line(window, sheets, current_sheet):
 
 
 def draw_row_and_column_labels(window, sheet):
-    max_y, max_x = window.getmaxyx()
-    max_y -= 3
-    margin = get_margin(window, sheet)
-    for y in range(2, max_y):
-        window.addstr(y, 0, str(y - 1).ljust(margin - 1), curses.A_REVERSE)
-    column_header = ' ' * margin
-    i = 0
-    while len(column_header) < max_x:
+    bounds = cursor_bounds(window, sheet)
+    for y in range(bounds[0][1], bounds[1][1] + 1):
+        window.addstr(y, 0,
+                      str(y - 1 + sheet.scroll[1]).ljust(bounds[0][0] - 1),
+                      curses.A_REVERSE)
+    column_header = ' ' * bounds[0][0]
+    i = sheet.scroll[0]
+    while len(column_header) < bounds[1][0]:
         column_header += label_for_column(i).center(sheet.column_width(i))
         i += 1
-    window.addstr(1, 0, column_header[:max_x], curses.A_REVERSE)
+    window.addstr(1, 0, column_header[:bounds[1][0] + 1], curses.A_REVERSE)
 
 
 def draw_cells(window, sheet):
-    max_y, max_x = window.getmaxyx()
-    max_y -= 3
-    x = get_margin(window, sheet)
-    for column_index, column in enumerate(sheet.cells):
+    bounds = cursor_bounds(window, sheet)
+    x = bounds[0][0]
+    for column_index in range(sheet.scroll[0], sheet.size[0]):
         y = 2
-        for row_index, cell in enumerate(column):
-            if y < max_y and x < max_x:
-                window.addstr(y, x, cell.content[:max_x - x])
+        for row_index in range(sheet.scroll[1], sheet.size[1]):
+            if y <= bounds[1][1] and x <= bounds[1][0]:
+                cell = sheet.cells[column_index][row_index]
+                window.addstr(y, x, cell.content[:bounds[1][0] + 1 - x])
             y += sheet.row_heights[row_index]
         x += sheet.column_widths[column_index]
 
 
-def draw_status_line(window):
-    max_y, max_x = window.getmaxyx()
-    status = 'Testing status line'
-    text = '[ {} ]'.format(status)
-    window.addstr(max_y - 3, max_x // 2 - len(text) // 2, text,
-                  curses.A_REVERSE)
+def draw_status_line(window, sheet):
+    if sheet.status:
+        max_y, max_x = window.getmaxyx()
+        text = '[ {} ]'.format(sheet.status)
+        window.addstr(max_y - 3, max(0, max_x // 2 - len(text) // 2),
+                      text[:max_x], curses.A_REVERSE)
 
 
 def draw_shortcut_lines(window):
@@ -79,10 +98,6 @@ def draw_shortcut_lines(window):
         x = x + width if y == 0 else x
 
 
-def get_margin(window, sheet):
-    return len(str(window.getmaxyx()[0] - 5)) + 1
-
-
 def label_for_column(index):
     label = ''
     while index > 0 or len(label) == 0:
@@ -94,10 +109,20 @@ def label_for_column(index):
     return label
 
 
+def scroll_sheet(window, sheet):
+    cursor = cursor_coordinates(window, sheet)
+    bounds = cursor_bounds(window, sheet)
+    for i in range(2):
+        while cursor[i] < bounds[0][i]:
+            sheet.scroll[i] -= 1
+            cursor = cursor_coordinates(window, sheet)
+        while cursor[i] > bounds[1][i]:
+            sheet.scroll[i] += 1
+            cursor = cursor_coordinates(window, sheet)
+
+
 def set_cursor(window, sheet):
     max_y, max_x = window.getmaxyx()
-    margin = get_margin(window, sheet)
-    cursor_y = sheet.cursor[1] + 2
-    cursor_x = (sheet.text_cursor + margin +
-                sum(sheet.column_width(i) for i in range(sheet.cursor[0])))
+    margin = cursor_bounds(window, sheet)[0][0]
+    cursor_x, cursor_y = cursor_coordinates(window, sheet)
     window.move(min(max_y - 4, cursor_y), min(max_x - 1, cursor_x))

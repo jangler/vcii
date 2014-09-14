@@ -13,7 +13,7 @@ Coding guidelines
 -----------------
 
 `vcii` should depend only on Python 3. No external libraries should be
-required--not even Python libraries.
+required, not even Python libraries.
 
 Code should pass inspection from [`pep8`](https://pypi.python.org/pypi/pep8)
 and [`pylint -E`](https://pypi.python.org/pypi/pylint). It should also have

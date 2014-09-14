@@ -1,9 +1,5 @@
 import re
 
-ALIGN_LEFT = 0
-ALIGN_CENTER = 1
-ALIGN_RIGHT = 2
-
 DEFAULT_COLUMN_WIDTH = 10
 
 CELL_ID_PATTERN = re.compile(r'([a-zA-Z]+)(\d+)')
@@ -27,7 +23,6 @@ class Cell:
 
     def __init__(self):
         self.content = ''
-        self.align = ALIGN_LEFT
 
 
 class Sheet:
@@ -41,6 +36,7 @@ class Sheet:
         self.text_cursor = 0
         self.title = None
         self.modified = False
+        self.status = None
 
     @property
     def num_columns(self):

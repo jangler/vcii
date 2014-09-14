@@ -7,7 +7,7 @@ setup(
     author_email='brandon@jangler.info',
     url='https://github.com/jangler/vcii',
     description='A TUI spreadsheet application.',
-    long_description=open('README.md').read(),
+    long_description=open('README.txt').read(),
     packages=['vcii', 'vcii.test'],
     scripts=['bin/vcii'],
     license='MIT',

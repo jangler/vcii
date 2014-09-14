@@ -1,9 +1,17 @@
 import curses
 
+from vcii.app import MODE_OPEN, MODE_SAVE
 
-SHORTCUTS = {
-    '^X': 'Exit',
-}
+
+SHORTCUTS_NORMAL = (
+    ('^Q', 'Quit'),
+    ('^T', 'Tab over'),
+    ('^O', 'Open'),
+    ('^S', 'Save'),
+)
+SHORTCUTS_INPUT = (
+    ('^C', 'Cancel'),
+)
 
 
 def cursor_bounds(window, sheet):
@@ -24,14 +32,14 @@ def cursor_coordinates(window, sheet):
     return cursor_x, cursor_y
 
 
-def draw(window, sheets, current_sheet):
+def draw(window, sheets, current_sheet, mode):
     window.erase()
     draw_tab_line(window, sheets, current_sheet)
     scroll_sheet(window, current_sheet)
     draw_row_and_column_labels(window, current_sheet)
     draw_cells(window, current_sheet)
     draw_status_line(window, current_sheet)
-    draw_shortcut_lines(window)
+    draw_shortcut_lines(window, mode)
     window.refresh()
     set_cursor(window, current_sheet)
 
@@ -42,8 +50,7 @@ def draw_tab_line(window, sheets, current_sheet):
     x = 0
     for sheet in sheets:
         format_str = ' + {} ' if sheet.modified else ' {} '
-        title = sheet.title if sheet.title else '[No Name]'
-        title = title[-max_len:]
+        title = sheet.ui_title[-max_len:]
         tab_label = format_str.format(title)[0:max_x - x]
         attr = curses.A_REVERSE if sheet == current_sheet else curses.A_NORMAL
         if x < max_x:
@@ -86,14 +93,18 @@ def draw_status_line(window, sheet):
                       text[:max_x], curses.A_REVERSE)
 
 
-def draw_shortcut_lines(window):
+def draw_shortcut_lines(window, mode):
     max_y, max_x = window.getmaxyx()
-    width = max_x // max(1, len(SHORTCUTS) // 2)
-    y = max_y - 2
+    shortcuts = SHORTCUTS_NORMAL
+    if mode in (MODE_OPEN, MODE_SAVE):
+        shortcuts = SHORTCUTS_INPUT
+    width = max_x // ((len(shortcuts) + 1) // 2)
+    key_width = max(len(x[0]) for x in shortcuts) + 1
+    y = 0
     x = 0
-    for key, value in SHORTCUTS.items():
-        window.addstr(y, x, key, curses.A_REVERSE)
-        window.addstr(y, x + 3, value)
+    for key, value in shortcuts:
+        window.addstr(max_y - 2 + y, x, key, curses.A_REVERSE)
+        window.addstr(max_y - 2 + y, x + key_width, value)
         y = (y + 1) % 2
         x = x + width if y == 0 else x
 

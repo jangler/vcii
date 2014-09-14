@@ -3,6 +3,7 @@ import random
 import unittest
 
 import vcii.sheet as sheet
+from vcii.app import MODE_NORMAL, MODE_OPEN
 from vcii.display import *
 
 
@@ -21,7 +22,11 @@ class TestDisplay(unittest.TestCase):
         cursor_coordinates(self.window, self.sheets[0])
 
     def test_draw(self):
-        draw(self.window, self.sheets, self.sheets[0])
+        draw(self.window, self.sheets, self.sheets[0], MODE_NORMAL)
+
+    def test_draw_shortcut_lines(self):
+        draw_shortcut_lines(self.window, MODE_NORMAL)
+        draw_shortcut_lines(self.window, MODE_OPEN)
 
     def test_draw_status(self):
         draw_status_line(self.window, self.sheets[0])

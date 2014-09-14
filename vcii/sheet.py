@@ -21,8 +21,8 @@ def indices_from_label(label):
 
 class Cell:
 
-    def __init__(self):
-        self.content = ''
+    def __init__(self, content=''):
+        self.content = content
 
 
 class Sheet:
@@ -49,6 +49,10 @@ class Sheet:
     @property
     def size(self):
         return len(self.column_widths), len(self.row_heights)
+
+    @property
+    def ui_title(self):
+        return self.title if self.title else '[No name]'
 
     def expand(self, x, y):
         while x >= self.num_columns:

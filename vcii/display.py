@@ -1,6 +1,6 @@
 import curses
 
-from vcii.app import MODE_OPEN, MODE_SAVE
+from vcii.app import MODE_OPEN, MODE_QUIT, MODE_SAVE
 
 
 SHORTCUTS_NORMAL = (
@@ -11,6 +11,10 @@ SHORTCUTS_NORMAL = (
 )
 SHORTCUTS_INPUT = (
     ('^C', 'Cancel'),
+)
+SHORTCUTS_YESNO = (
+    ('Y', 'Yes'),
+    ('N', 'No'),
 )
 
 
@@ -98,6 +102,8 @@ def draw_shortcut_lines(window, mode):
     shortcuts = SHORTCUTS_NORMAL
     if mode in (MODE_OPEN, MODE_SAVE):
         shortcuts = SHORTCUTS_INPUT
+    elif mode == MODE_QUIT:
+        shortcuts = SHORTCUTS_YESNO
     width = max_x // ((len(shortcuts) + 1) // 2)
     key_width = max(len(x[0]) for x in shortcuts) + 1
     y = 0

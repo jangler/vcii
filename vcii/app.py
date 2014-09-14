@@ -5,6 +5,7 @@ import vcii.format_csv as format_csv
 from vcii.sheet import Sheet
 
 
+MODE_EXIT = -1
 MODE_NORMAL = 0
 MODE_QUIT = 1
 MODE_OPEN = 2
@@ -19,6 +20,12 @@ class App:
         self.mode = MODE_NORMAL
         self.string_buffer = ''
 
+    def close_tab(self):
+        index = self.sheets.index(self.sheet)
+        self.sheets.remove(self.sheet)
+        if len(self.sheets) > 0:
+            self.sheet = self.sheets[index % len(self.sheets)]
+
     def key_command(self, ch, keyname, parameters=None):
         previous_mode = self.mode
         previous_sheet = self.sheet
@@ -29,7 +36,7 @@ class App:
                 self.sheet.move_cursor(0, 1)
             elif ch == curses.KEY_UP:
                 self.sheet.move_cursor(0, -1)
-            elif ch == curses.KEY_LEFT:
+            elif ch in (curses.KEY_LEFT, curses.KEY_BTAB):
                 self.sheet.move_cursor(-1, 0)
             elif ch in (curses.KEY_RIGHT, ord('\t')):
                 self.sheet.move_cursor(1, 0)
@@ -39,7 +46,12 @@ class App:
                 self.mode = MODE_OPEN
                 self.string_buffer = ''
             elif keyname == '^Q':
-                self.mode = MODE_QUIT
+                if self.sheet.modified:
+                    self.mode = MODE_QUIT
+                else:
+                    self.close_tab()
+                if len(self.sheets) == 0:
+                    self.mode = MODE_EXIT
             elif keyname == '^S':
                 self.mode = MODE_SAVE
                 if self.sheet.title:
@@ -74,6 +86,12 @@ class App:
 
             if self.string_buffer != previous_buffer:
                 self.sheet.status = '{} {}'.format(prompt, self.string_buffer)
+        elif self.mode == MODE_QUIT:
+            self.sheet.status = 'Discard changes?'
+            if keyname.lower() in ('y', 'n'):
+                if keyname.lower() == 'y':
+                    self.close_tab()
+                self.mode = MODE_NORMAL if len(self.sheets) > 0 else MODE_EXIT
 
         return (previous_mode != self.mode or
                 previous_sheet != self.sheet or

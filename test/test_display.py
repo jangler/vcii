@@ -27,6 +27,7 @@ class TestDisplay(unittest.TestCase):
     def test_draw_shortcut_lines(self):
         draw_shortcut_lines(self.window, MODE_NORMAL)
         draw_shortcut_lines(self.window, MODE_OPEN)
+        draw_shortcut_lines(self.window, MODE_QUIT)
 
     def test_draw_status(self):
         draw_status_line(self.window, self.sheets[0])

@@ -21,7 +21,7 @@ def read(filename):
             sheet.cursor[1] += 1
         for column in range(sheet.size[0]):
             width = max(len(sheet.cells[column][row].content)
-                        for row in range(sheet.size[1])) + 1
+                        for row in range(sheet.size[1])) + 2
             sheet.column_widths[column] = width
         sheet.cursor = [0, 0]
         sheet.modified = False

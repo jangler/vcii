@@ -47,6 +47,13 @@ class TestApp(unittest.TestCase):
         self.assertEqual(app.sheet, app.sheets[1])
         app.key_command(1, 'unknown')
         app.key_command(None, 'not even unknown')
+        app.sheet = app.sheets[1]
+        app.key_command(None, '^Q')
+        self.assertEqual(app.mode, MODE_NORMAL)
+        self.assertEqual(len(app.sheets), 1)
+        app.sheets[0].modified = False
+        app.key_command(None, '^Q')
+        self.assertEqual(app.mode, MODE_EXIT)
 
     def test_key_command_input(self):
         app = App()
@@ -65,9 +72,24 @@ class TestApp(unittest.TestCase):
         app.key_command(None, '^C')
         self.assertEqual(app.mode, MODE_NORMAL)
 
+    def test_key_command_quit(self):
+        app = App()
+        app.sheet.modified = True
+        app.mode = MODE_QUIT
+        app.key_command(ord('a'), 'a')
+        self.assertEqual(len(app.sheets), 1)
+        self.assertEqual(app.mode, MODE_QUIT)
+        app.key_command(ord('n'), 'n')
+        self.assertEqual(len(app.sheets), 1)
+        self.assertEqual(app.mode, MODE_NORMAL)
+        app.mode = MODE_QUIT
+        app.key_command(ord('y'), 'y')
+        self.assertEqual(len(app.sheets), 0)
+        self.assertEqual(app.mode, MODE_EXIT)
+
     def test_key_command_other(self):
         app = App()
-        app.mode = MODE_QUIT
+        app.mode = MODE_EXIT
         app.key_command(ord('a'), 'a')
 
     def test_open_file(self):

@@ -5,4 +5,5 @@ A TUI spreadsheet application.
 
 > "after i started using `vcii`, my spreadsheets became luxurious and
 > byzantine"
-> > -- a satisfied user
+>
+> -- a satisfied user

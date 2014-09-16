@@ -84,13 +84,6 @@ class Sheet:
         self.text_cursor = len(self.active_cell.content)
         self.modified = True
 
-    def backspace(self):
-        if self.cursor_in_bounds():
-            if len(self.active_cell.content) > 0:
-                self.modified = True
-            self.active_cell.content = self.active_cell.content[:-1]
-            self.text_cursor = len(self.active_cell.content)
-
     def cursor_in_bounds(self):
         return (
             self.cursor[0] < self.num_columns and

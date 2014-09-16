@@ -23,23 +23,6 @@ class TestSheet(unittest.TestCase):
         self.assertEqual(sheet.active_cell.content, 'rainbow')
         self.assertTrue(sheet.modified)
 
-    def test_backspace(self):
-        sheet = Sheet()
-        sheet.cursor = [(lambda: random.randint(0, 10))()] * 2
-        sheet.backspace()
-        self.assertFalse(sheet.modified)
-        sheet.append('xy')
-        sheet.modified = False
-        sheet.backspace()
-        self.assertEqual(sheet.active_cell.content, 'x')
-        self.assertTrue(sheet.modified)
-        sheet.backspace()
-        self.assertEqual(sheet.active_cell.content, '')
-        sheet.modified = False
-        sheet.backspace()
-        self.assertEqual(sheet.active_cell.content, '')
-        self.assertFalse(sheet.modified)
-
     def test_expand(self):
         sheet = Sheet()
         self.assertEqual(sheet.size, (0, 0))

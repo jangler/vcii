@@ -37,16 +37,16 @@ def cursor_coordinates(window, sheet):
     return cursor_x, cursor_y
 
 
-def draw(window, sheets, current_sheet, mode):
+def draw(window, app):
     window.erase()
-    draw_tab_line(window, sheets, current_sheet)
-    scroll_sheet(window, current_sheet)
-    draw_row_and_column_labels(window, current_sheet)
-    draw_cells(window, current_sheet)
-    draw_status_line(window, current_sheet)
-    draw_shortcut_lines(window, mode)
+    draw_tab_line(window, app.sheets, app.sheet)
+    scroll_sheet(window, app.sheet)
+    draw_row_and_column_labels(window, app.sheet)
+    draw_cells(window, app.sheet)
+    draw_status_line(window, app.sheet)
+    draw_shortcut_lines(window, app.mode)
     window.refresh()
-    set_cursor(window, current_sheet)
+    set_cursor(window, app)
 
 
 def draw_tab_line(window, sheets, current_sheet):
@@ -139,8 +139,13 @@ def scroll_sheet(window, sheet):
             cursor = cursor_coordinates(window, sheet)
 
 
-def set_cursor(window, sheet):
+def set_cursor(window, app):
     max_y, max_x = window.getmaxyx()
-    margin = cursor_bounds(window, sheet)[0][0]
-    cursor_x, cursor_y = cursor_coordinates(window, sheet)
-    window.move(min(max_y - 4, cursor_y), min(max_x - 1, cursor_x))
+    if app.mode in (MODE_OPEN, MODE_SAVE):
+        cursor_x = (len(app.sheet.status.split(': ')[0]) + 2 + app.cursor +
+                    max_x // 2 - len(app.sheet.status) // 2)
+        window.move(max_y - 3, min(max_x - 1, max(0, cursor_x)))
+    else:
+        margin = cursor_bounds(window, app.sheet)[0][0]
+        cursor_x, cursor_y = cursor_coordinates(window, app.sheet)
+        window.move(min(max_y - 4, cursor_y), min(max_x - 1, cursor_x))

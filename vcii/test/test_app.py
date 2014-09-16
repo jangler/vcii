@@ -18,16 +18,22 @@ class TestApp(unittest.TestCase):
         app = App()
         app.key_command(curses.KEY_DOWN, 'KEY_DOWN')
         self.assertEqual(app.sheet.cursor, [0, 1])
-        app.key_command(curses.KEY_RIGHT, 'KEY_RIGHT')
+        app.key_command(ord('\t'), '\t')
         self.assertEqual(app.sheet.cursor, [1, 1])
-        app.key_command(curses.KEY_LEFT, 'KEY_LEFT')
+        app.key_command(curses.KEY_BTAB, 'KEY_BTAB')
         self.assertEqual(app.sheet.cursor, [0, 1])
         app.key_command(curses.KEY_UP, 'KEY_UP')
         self.assertEqual(app.sheet.cursor, [0, 0])
+        app.key_command(curses.KEY_NPAGE, 'KEY_NPAGE')
+        self.assertGreater(app.sheet.cursor[1], 1)
+        app.key_command(curses.KEY_PPAGE, 'KEY_PPAGE')
+        self.assertEqual(app.sheet.cursor, [0, 0])
+        app.key_command(curses.KEY_BACKSPACE, 'KEY_BACKSPACE')
         app.key_command(ord('x'), 'x')
         self.assertEqual(app.sheet.active_cell.content, 'x')
         app.key_command(curses.KEY_BACKSPACE, 'KEY_BACKSPACE')
         self.assertEqual(app.sheet.active_cell.content, '')
+        app.key_command(curses.KEY_BACKSPACE, 'KEY_BACKSPACE')
         app.mode = MODE_NORMAL
         app.key_command(None, '^O')
         self.assertEqual(app.mode, MODE_OPEN)
@@ -68,9 +74,9 @@ class TestApp(unittest.TestCase):
         self.assertEqual(app.mode, MODE_NORMAL)
         app.mode = MODE_OPEN
         app.key_command(ord('a'), 'a')
-        self.assertEqual(app.string_buffer, 'a')
+        self.assertEqual(app.string, 'a')
         app.key_command(curses.KEY_BACKSPACE, 'KEY_BACKSPACE')
-        self.assertEqual(app.string_buffer, '')
+        self.assertEqual(app.string, '')
         app.key_command(None, '^C')
         self.assertEqual(app.mode, MODE_NORMAL)
 
@@ -96,17 +102,17 @@ class TestApp(unittest.TestCase):
 
     def test_open_file(self):
         app = App()
-        app.string_buffer = 'unsupported.format'
+        app.string = 'unsupported.format'
         app.open_file()
         self.assertEqual(len(app.sheets), 1)
         self.assertEqual(app.sheet.title, None)
-        app.string_buffer = 'new.csv'
+        app.string = 'new.csv'
         app.open_file()
         self.assertEqual(len(app.sheets), 1)
         self.assertEqual(app.sheet.title, 'new.csv')
         with open('old.csv', 'w') as f:
             f.write('a,b,c')
-        app.string_buffer = 'old.csv'
+        app.string = 'old.csv'
         app.open_file()
         os.remove('old.csv')
         self.assertEqual(len(app.sheets), 2)
@@ -115,7 +121,7 @@ class TestApp(unittest.TestCase):
         with open('inaccessible.csv', 'w') as f:
             f.write('d,e,f')
         os.chmod('inaccessible.csv', 0o222)
-        app.string_buffer = 'inaccessible.csv'
+        app.string = 'inaccessible.csv'
         app.open_file()
         os.remove('inaccessible.csv')
         self.assertEqual(len(app.sheets), 2)
@@ -123,12 +129,12 @@ class TestApp(unittest.TestCase):
 
     def test_save_file(self):
         app = App()
-        app.string_buffer = 'unsupported.format'
+        app.string = 'unsupported.format'
         app.save_file()
         self.assertEqual(os.path.isfile('unsupported.format'), False)
-        app.string_buffer = 'save.csv'
+        app.string = 'save.csv'
         app.save_file()
         self.assertEqual(os.path.isfile('save.csv'), True)
         os.remove('save.csv')
-        app.string_buffer = '/inaccessible.csv'
+        app.string = '/inaccessible.csv'
         app.save_file()

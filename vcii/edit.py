@@ -3,6 +3,9 @@
 # resulting string and cursor position.
 
 
+import os
+
+
 def cursor_left(text, cursor):
     return text, max(0, cursor - 1)
 
@@ -42,6 +45,21 @@ def backward_kill_line(text, cursor):
     return text[cursor:], 0
 
 
+def tab_complete(text, cursor):
+    dirname, basename = os.path.split(text[:cursor])
+    try:
+        files = [name for name in os.listdir(dirname if dirname else '.')
+                 if name.startswith(basename)]
+        if files:
+            new_text = os.path.join(dirname, files[0] + text[cursor:])
+            if os.path.isdir(new_text):
+                new_text = os.path.join(new_text, '')
+            text, cursor = new_text, cursor + len(new_text) - len(text)
+    except FileNotFoundError:
+        pass
+    return text, cursor
+
+
 KEYS = {
     'KEY_LEFT': cursor_left,
     'KEY_RIGHT': cursor_right,
@@ -55,6 +73,7 @@ KEYS = {
     '^E': end,
     '^F': cursor_right,
     '^H': rubout,
+    '^I': tab_complete,
     '^K': kill_line,
     '^U': backward_kill_line,
     '^W': rubout_word,

@@ -44,3 +44,11 @@ class TestApp(unittest.TestCase):
     def test_backward_kill_line(self):
         self.assertEqual(backward_kill_line('hi', 0), ('hi', 0))
         self.assertEqual(backward_kill_line('hi', 2), ('', 0))
+
+    def test_tab_complete(self):
+        self.assertEqual(tab_complete('READ', 4), ('README.txt', 10))
+        self.assertEqual(tab_complete('READ', 3), ('README.txtD', 10))
+        self.assertEqual(tab_complete('bin', 3), ('bin/', 4))
+        self.assertEqual(tab_complete('bin/', 4), ('bin/vcii', 8))
+        self.assertEqual(tab_complete('nonmatch', 8), ('nonmatch', 8))
+        self.assertEqual(tab_complete('fake/dir', 8), ('fake/dir', 8))

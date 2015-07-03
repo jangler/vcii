@@ -146,6 +146,5 @@ def set_cursor(window, app):
                     max_x // 2 - len(app.sheet.status) // 2)
         window.move(max_y - 3, min(max_x - 1, max(0, cursor_x)))
     else:
-        margin = cursor_bounds(window, app.sheet)[0][0]
         cursor_x, cursor_y = cursor_coordinates(window, app.sheet)
         window.move(min(max_y - 4, cursor_y), min(max_x - 1, cursor_x))
